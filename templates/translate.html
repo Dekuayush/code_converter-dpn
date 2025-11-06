@@ -1261,6 +1261,146 @@
             }
         }
         
+        // Global functions for HTML onclick handlers - MUST be defined early
+        function downloadCode() {
+            playSound('copy');
+            
+            let code = '';
+            if (window.editor) {
+                code = window.editor.getValue();
+            } else if (window.convertedCode) {
+                // Fallback: use global variable
+                code = window.convertedCode;
+            } else {
+                // Last resort: get from data
+                const codeData = JSON.parse(document.getElementById('code-data').textContent);
+                code = codeData.convertedCode || '';
+            }
+            
+            if (!code || code.trim() === '') {
+                alert('No converted code available to download');
+                return;
+            }
+            
+            const targetLang = '{{ target_lang|lower }}';
+            let extension = 'txt';
+            
+            if (targetLang === 'python') extension = 'py';
+            else if (targetLang === 'javascript') extension = 'js';
+            else if (targetLang === 'typescript') extension = 'ts';
+            else if (targetLang === 'java') extension = 'java';
+            else if (targetLang === 'c++') extension = 'cpp';
+            else if (targetLang === 'c') extension = 'c';
+            else if (targetLang === 'c#') extension = 'cs';
+            else if (targetLang === 'php') extension = 'php';
+            else if (targetLang === 'go') extension = 'go';
+            else if (targetLang === 'ruby') extension = 'rb';
+            else if (targetLang === 'perl') extension = 'pl';
+            else if (targetLang === 'bash' || targetLang === 'shell') extension = 'sh';
+            else if (targetLang === 'powershell') extension = 'ps1';
+            
+            const blob = new Blob([code], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `converted_code.${extension}`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+        
+        function copyOriginalCode() {
+            let code = '';
+            
+            if (window.originalEditor) {
+                code = window.originalEditor.getValue();
+            } else if (window.originalCode) {
+                // Fallback: use global variable
+                code = window.originalCode;
+            } else {
+                // Last resort: get from data
+                const codeData = JSON.parse(document.getElementById('code-data').textContent);
+                code = codeData.originalCode || '';
+            }
+            
+            if (!code || code.trim() === '') {
+                alert('No original code available to copy');
+                return;
+            }
+            
+            navigator.clipboard.writeText(code).then(() => {
+                playSound('copy');
+                showNotification('Original code copied!');
+            }).catch(err => {
+                console.error('Failed to copy original code with clipboard API:', err);
+                // Try fallback method
+                fallbackCopy(code);
+            });
+        }
+        
+        function copyCode() {
+            let code = '';
+            
+            if (window.editor) {
+                code = window.editor.getValue();
+            } else if (window.convertedCode) {
+                code = window.convertedCode;
+            } else {
+                const codeData = JSON.parse(document.getElementById('code-data').textContent);
+                code = codeData.convertedCode || '';
+            }
+            
+            if (!code || code.trim() === '') {
+                alert('No converted code available to copy');
+                return;
+            }
+            
+            navigator.clipboard.writeText(code).then(() => {
+                playSound('copy');
+                showNotification('Converted code copied!');
+            }).catch(err => {
+                console.error('Failed to copy with clipboard API:', err);
+                fallbackCopy(code);
+            });
+        }
+        
+        function showNotification(message) {
+            const notification = document.getElementById('copyNotification');
+            if (notification) {
+                notification.innerHTML = `<i class="fas fa-check"></i> ${message}`;
+                notification.style.display = 'block';
+                setTimeout(() => {
+                    notification.style.display = 'none';
+                }, 3000);
+            } else {
+                // Fallback alert if notification element doesn't exist
+                alert(message);
+            }
+        }
+        
+        function fallbackCopy(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            textArea.style.top = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                document.execCommand('copy');
+                showNotification('Code copied!');
+                playSound('copy');
+            } catch (err) {
+                console.error('Fallback copy failed:', err);
+                alert('Copy failed. Please copy manually.');
+            } finally {
+                document.body.removeChild(textArea);
+            }
+        }
+        
         function toggleSound() {
             soundEnabled = !soundEnabled;
             const toggle = document.getElementById('soundToggle');
@@ -1309,58 +1449,7 @@
             }
         }
         
-        // Download Code
-        function downloadCode() {
-            playSound('copy');
-            const code = editor.getValue();
-            const targetLang = '{{ target_lang|lower }}';
-            let extension = 'txt';
-            
-            if (targetLang === 'python') extension = 'py';
-            else if (targetLang === 'javascript') extension = 'js';
-            else if (targetLang === 'typescript') extension = 'ts';
-            else if (targetLang === 'java') extension = 'java';
-            else if (targetLang === 'c++') extension = 'cpp';
-            else if (targetLang === 'c') extension = 'c';
-            else if (targetLang === 'c#') extension = 'cs';
-            else if (targetLang === 'php') extension = 'php';
-            else if (targetLang === 'go') extension = 'go';
-            else if (targetLang === 'ruby') extension = 'rb';
-            else if (targetLang === 'perl') extension = 'pl';
-            else if (targetLang === 'bash' || targetLang === 'shell') extension = 'sh';
-            else if (targetLang === 'powershell') extension = 'ps1';
-            
-            const blob = new Blob([code], { type: 'text/plain' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = converted_code.${extension};
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-        }
-        
-        // Copy Original Code
-        function copyOriginalCode() {
-            if (window.originalEditor) {
-                const code = originalEditor.getValue();
-                navigator.clipboard.writeText(code).then(() => {
-                    playSound('copy');
-                    showNotification('Original code copied!');
-                });
-            }
-        }
-        
-        // Show notification
-        function showNotification(message) {
-            const notification = document.getElementById('copyNotification');
-            notification.innerHTML = <i class="fas fa-check"></i> ${message};
-            notification.style.display = 'block';
-            setTimeout(() => {
-                notification.style.display = 'none';
-            }, 3000);
-        }
+        // Settings Panel
         
         // Load saved theme
         window.addEventListener('DOMContentLoaded', () => {
@@ -1371,7 +1460,7 @@
             document.querySelectorAll('.theme-option').forEach(btn => {
                 btn.classList.remove('active');
             });
-            const activeBtn = document.querySelector([data-theme="${savedTheme}"]);
+            const activeBtn = document.querySelector(`[data-theme="${savedTheme}"]`);
             if (activeBtn) activeBtn.classList.add('active');
             
             playSound('success');
@@ -1405,6 +1494,10 @@
             console.log('Converted Code:', codeData.convertedCode);
             console.log('Source Lang:', codeData.sourceLang);
             console.log('Target Lang:', codeData.targetLang);
+            
+            // Store code globally for immediate access (before CodeMirror initializes)
+            window.convertedCode = codeData.convertedCode || '';
+            window.originalCode = codeData.originalCode || '';
             
             // Determine source mode
             const sourceLang = codeData.sourceLang.toLowerCase();
@@ -1474,21 +1567,11 @@
             }, 300);
         });
         
-        // Copy Code
-        function copyCode() {
-            const code = editor.getValue();
-            navigator.clipboard.writeText(code).then(() => {
-                playSound('copy');
-                showNotification('Converted code copied!');
-            }).catch(err => {
-                console.error('Failed to copy:', err);
-                alert('Failed to copy code to clipboard');
-            });
-        }
-        
         // Add click sounds to buttons
-        document.querySelectorAll('button, a').forEach(element => {
-            element.addEventListener('click', () => playSound('click'));
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('button, a').forEach(element => {
+                element.addEventListener('click', () => playSound('click'));
+            });
         });
     </script>
 </body>
