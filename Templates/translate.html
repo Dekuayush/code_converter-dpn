@@ -1,0 +1,1495 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+    <title>Converted Code | Code Converter</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/dracula.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/material-darker.min.css">
+    <style>
+        /* Theme Variables */
+        [data-theme="dark"] {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --dark-bg: #0f0f23;
+            --card-bg: #1a1a2e;
+            --border-color: #2d2d44;
+            --text-color: #e8eaed;
+            --heading-color: #ffffff;
+            --code-bg: #16213e;
+            --output-bg: #0f1419;
+            --output-border: #38ef7d;
+            --output-text: #38ef7d;
+            --header-bg: var(--primary-gradient);
+        }
+        
+        [data-theme="light"] {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --dark-bg: #f0f2f5;
+            --card-bg: #ffffff;
+            --border-color: #d0d7de;
+            --text-color: #1f2937;
+            --heading-color: #111827;
+            --code-bg: #f6f8fa;
+            --output-bg: #f0fdf4;
+            --output-border: #22c55e;
+            --output-text: #15803d;
+            --header-bg: var(--primary-gradient);
+        }
+        
+        [data-theme="cyberpunk"] {
+            --primary-gradient: linear-gradient(135deg, #ff0080 0%, #7928ca 100%);
+            --success-gradient: linear-gradient(135deg, #00ff88 0%, #00ccff 100%);
+            --warning-gradient: linear-gradient(135deg, #ff0080 0%, #ff8c00 100%);
+            --dark-bg: #0a0a0f;
+            --card-bg: #1a0a1f;
+            --border-color: #ff0080;
+            --text-color: #e0e0ff;
+            --heading-color: #00ff88;
+            --code-bg: #0d0014;
+            --output-bg: #001a0a;
+            --output-border: #00ff88;
+            --output-text: #00ff88;
+            --header-bg: linear-gradient(135deg, #ff0080 0%, #00ff88 100%);
+        }
+        
+        [data-theme="ocean"] {
+            --primary-gradient: linear-gradient(135deg, #2E3192 0%, #1BFFFF 100%);
+            --success-gradient: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
+            --warning-gradient: linear-gradient(135deg, #f857a6 0%, #ff5858 100%);
+            --dark-bg: #0a1929;
+            --card-bg: #132f4c;
+            --border-color: #1BFFFF;
+            --text-color: #E3F2FD;
+            --heading-color: #1BFFFF;
+            --code-bg: #0d1b2a;
+            --output-bg: #0a1e2e;
+            --output-border: #00d2ff;
+            --output-text: #00d2ff;
+            --header-bg: var(--primary-gradient);
+        }
+        
+        * {
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+        
+        body {
+            background: var(--dark-bg);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-color);
+        }
+        
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+        
+        @keyframes glow {
+            0%, 100% {
+                box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 40px rgba(102, 126, 234, 0.8);
+            }
+        }
+        
+        @keyframes shimmer {
+            0% {
+                background-position: -1000px 0;
+            }
+            100% {
+                background-position: 1000px 0;
+            }
+        }
+        
+        .animate-fade-in {
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        .animate-slide-in {
+            animation: slideInRight 0.6s ease-out;
+        }
+        
+        .animate-delay-1 { animation-delay: 0.2s; opacity: 0; animation-fill-mode: forwards; }
+        .animate-delay-2 { animation-delay: 0.4s; opacity: 0; animation-fill-mode: forwards; }
+        .animate-delay-3 { animation-delay: 0.6s; opacity: 0; animation-fill-mode: forwards; }
+        .animate-delay-4 { animation-delay: 0.8s; opacity: 0; animation-fill-mode: forwards; }
+        
+        /* Header */
+        .main-header {
+            background: var(--header-bg);
+            padding: 2rem 0;
+            margin-bottom: 3rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .main-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 200%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+        
+        .main-header .container {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .main-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .main-header h1 i {
+            display: inline-block;
+            color: #38ef7d;
+            animation: checkSuccess 2s ease-in-out infinite;
+        }
+        
+        @keyframes checkSuccess {
+            0%, 100% {
+                transform: scale(1) rotate(0deg);
+            }
+            25% {
+                transform: scale(1.2) rotate(5deg);
+            }
+            50% {
+                transform: scale(1.1) rotate(-5deg);
+            }
+            75% {
+                transform: scale(1.2) rotate(5deg);
+            }
+        }
+        
+        /* Animated Background Particles */
+        .header-particle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.25);
+            pointer-events: none;
+            box-shadow: 0 0 20px rgba(255,255,255,0.2);
+            z-index: 0;
+        }
+        
+        .header-particle:nth-child(1) {
+            width: 80px;
+            height: 80px;
+            top: 20%;
+            left: 10%;
+            animation: floatParticle 15s infinite ease-in-out;
+        }
+        
+        .header-particle:nth-child(2) {
+            width: 60px;
+            height: 60px;
+            top: 60%;
+            right: 15%;
+            animation: floatParticle 12s infinite ease-in-out reverse;
+        }
+        
+        .header-particle:nth-child(3) {
+            width: 100px;
+            height: 100px;
+            bottom: 20%;
+            left: 20%;
+            animation: floatParticle 18s infinite ease-in-out;
+        }
+        
+        .header-particle:nth-child(4) {
+            width: 70px;
+            height: 70px;
+            top: 40%;
+            right: 25%;
+            animation: floatParticle 14s infinite ease-in-out reverse;
+        }
+        
+        .header-particle:nth-child(5) {
+            width: 50px;
+            height: 50px;
+            bottom: 30%;
+            right: 10%;
+            animation: floatParticle 16s infinite ease-in-out;
+        }
+        
+        @keyframes floatParticle {
+            0%, 100% {
+                transform: translate(0, 0) scale(1);
+                opacity: 0.3;
+            }
+            25% {
+                transform: translate(30px, -40px) scale(1.1);
+                opacity: 0.5;
+            }
+            50% {
+                transform: translate(-20px, -80px) scale(0.9);
+                opacity: 0.4;
+            }
+            75% {
+                transform: translate(40px, -40px) scale(1.05);
+                opacity: 0.6;
+            }
+        }
+        
+        /* Settings Panel */
+        .settings-panel {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .settings-trigger {
+            width: 50px;
+            height: 50px;
+            background: var(--primary-gradient);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 1.3rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+            animation: rotate 4s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .settings-trigger:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+            animation-duration: 1s;
+        }
+        
+        .settings-dropdown {
+            position: absolute;
+            top: 60px;
+            right: 0;
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            min-width: 280px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+        }
+        
+        .settings-dropdown.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        .settings-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            color: var(--heading-color);
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .theme-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        
+        .theme-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 0.75rem;
+            background: transparent;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-color);
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .theme-option:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        
+        .theme-option.active {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.15);
+        }
+        
+        .theme-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .theme-dark .theme-icon { color: #667eea; }
+        .theme-light .theme-icon { color: #fbbf24; }
+        .theme-cyber .theme-icon { color: #ff0080; }
+        .theme-ocean .theme-icon { color: #1BFFFF; }
+        
+        .settings-divider {
+            height: 1px;
+            background: var(--border-color);
+            margin: 1rem 0;
+        }
+        
+        .setting-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            color: var(--text-color);
+            font-size: 0.95rem;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background: var(--success-gradient);
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        
+        /* Side-by-Side Layout */
+        .side-by-side-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            align-items: start;
+        }
+        
+        .code-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .code-panel {
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            position: relative;
+            height: fit-content;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .code-panel:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+        
+        .panel-header {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 1rem 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .panel-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .action-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.1);
+        }
+        
+        .panel-content {
+            padding: 0;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 400px;
+        }
+        
+        .panel-content .CodeMirror {
+            flex: 1;
+            height: 100%;
+            min-height: 400px;
+        }
+        
+        .panel-content > div {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .result-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            border: 2px solid var(--border-color);
+            transition: all 0.3s ease;
+            height: fit-content;
+        }
+        
+        .result-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.5);
+        }
+        
+        .explanation-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .output-section {
+            height: fit-content;
+        }
+        
+        @media (max-width: 992px) {
+            .side-by-side-container,
+            .code-comparison {
+                grid-template-columns: 1fr;
+            }
+            
+            .code-panel {
+                min-height: 300px;
+            }
+        }
+        
+        /* Floating Elements */
+        .floating-shapes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .shape {
+            position: absolute;
+            opacity: 0.1;
+            animation: float-around 20s infinite linear;
+        }
+        
+        .shape:nth-child(1) {
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+        
+        .shape:nth-child(2) {
+            top: 60%;
+            right: 15%;
+            animation-delay: -5s;
+        }
+        
+        .shape:nth-child(3) {
+            bottom: 30%;
+            left: 20%;
+            animation-delay: -10s;
+        }
+        
+        @keyframes float-around {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(100px, -50px) rotate(90deg); }
+            50% { transform: translate(200px, 100px) rotate(180deg); }
+            75% { transform: translate(-50px, 150px) rotate(270deg); }
+            100% { transform: translate(0, 0) rotate(360deg); }
+        }
+        
+        .result-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            border: 2px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+        
+        .result-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.5);
+        }
+        
+        .full-width {
+            grid-column: 1 / -1;
+        }
+        
+        /* Section Headers */
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+        
+        .section-header h4 {
+            margin: 0;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--heading-color);
+        }
+        
+        .section-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--primary-gradient);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            animation: glow 2s infinite;
+        }
+        
+        .success-icon { background: var(--success-gradient); }
+        .warning-icon { background: var(--warning-gradient); }
+        
+        /* Code Mirror */
+        .CodeMirror {
+            height: auto;
+            min-height: 300px;
+            font-size: 0.95rem;
+            border-radius: 12px;
+            background: var(--code-bg) !important;
+            color: var(--text-color) !important;
+        }
+        
+        .CodeMirror-scroll {
+            min-height: 300px;
+            overflow-x: hidden !important;
+        }
+        
+        .CodeMirror-scrollbar-filler {
+            background: transparent !important;
+        }
+        
+        .CodeMirror-hscrollbar {
+            display: none !important;
+        }
+        
+        .CodeMirror-vscrollbar {
+            width: 8px !important;
+        }
+        
+        .CodeMirror-vscrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .CodeMirror-vscrollbar::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.2);
+            border-radius: 4px;
+        }
+        
+        .CodeMirror-vscrollbar::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 4px;
+        }
+        
+        .CodeMirror-vscrollbar::-webkit-scrollbar-thumb:hover {
+            background: #764ba2;
+        }
+        
+        .CodeMirror-cursor {
+            border-left: 2px solid var(--text-color) !important;
+        }
+        
+        .CodeMirror pre {
+            white-space: pre-wrap !important;
+            word-wrap: break-word !important;
+        }
+        
+        .CodeMirror-gutters {
+            border-right: 1px solid var(--border-color);
+            background: var(--code-bg) !important;
+        }
+        
+        .CodeMirror-linenumber {
+            color: #667eea;
+            padding: 0 10px;
+        }
+        
+        /* Explanation & Output Blocks */
+        .explanation-block {
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            line-height: 1.8;
+            color: var(--text-color);
+            max-height: 600px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        
+        .explanation-block::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .explanation-block::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.2);
+            border-radius: 4px;
+        }
+        
+        .explanation-block::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 4px;
+        }
+        
+        .explanation-block::-webkit-scrollbar-thumb:hover {
+            background: #764ba2;
+        }
+        
+        /* Markdown Formatting in Explanation */
+        .explanation-block h2 {
+            color: var(--heading-color);
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+        
+        .explanation-block h2:first-child {
+            margin-top: 0;
+        }
+        
+        .explanation-block h3 {
+            color: #667eea;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .explanation-block h4 {
+            color: var(--text-color);
+            font-size: 1rem;
+            font-weight: 600;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .explanation-block ul, .explanation-block ol {
+            margin: 1rem 0;
+            padding-left: 2rem;
+        }
+        
+        .explanation-block li {
+            margin: 0.5rem 0;
+            line-height: 1.8;
+        }
+        
+        .explanation-block strong {
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        .explanation-block code {
+            background: rgba(102, 126, 234, 0.15);
+            color: #00ff88;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        
+        .explanation-block pre {
+            background: var(--code-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        
+        .explanation-block pre code {
+            background: transparent;
+            padding: 0;
+            color: var(--text-color);
+        }
+        
+        .explanation-block p {
+            margin: 0.75rem 0;
+        }
+        
+        .explanation-block ul, .explanation-block li {
+            color: var(--text-color);
+        }
+        
+        .output-block {
+            background: var(--output-bg);
+            border: 2px solid var(--output-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            line-height: 1.8;
+            position: relative;
+            max-height: 400px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        
+        .output-block::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .output-block::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.2);
+            border-radius: 4px;
+        }
+        
+        .output-block::-webkit-scrollbar-thumb {
+            background: var(--output-border);
+            border-radius: 4px;
+        }
+        
+        .output-block::-webkit-scrollbar-thumb:hover {
+            background: var(--output-text);
+        }
+        
+        .output-block::before {
+            content: '$ Output';
+            position: absolute;
+            top: -12px;
+            left: 15px;
+            background: var(--dark-bg);
+            padding: 0 10px;
+            color: var(--output-text);
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .output-block pre {
+            margin: 0;
+            color: var(--output-text);
+            font-size: 0.95rem;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        /* Badges */
+        .lang-badge {
+            display: inline-block;
+            background: rgba(102, 126, 234, 0.2);
+            color: #667eea;
+            padding: 0.4rem 0.9rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+        }
+        
+        .success-badge {
+            background: var(--success-gradient);
+            padding: 1rem 2.5rem;
+            border-radius: 15px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.2rem;
+            font-weight: 700;
+            box-shadow: 0 6px 20px rgba(56, 239, 125, 0.4);
+            color: white;
+        }
+        
+        /* Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+        
+        .btn-custom {
+            padding: 1rem 2.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            border: none;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+        }
+        
+        .btn-back {
+            background: var(--primary-gradient);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+        
+        .btn-back:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+        
+        .btn-copy {
+            background: var(--warning-gradient);
+            box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);
+            color: white;
+        }
+        
+        .btn-copy:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245, 87, 108, 0.6);
+        }
+        
+        .btn-sound {
+            background: var(--success-gradient);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: white;
+            box-shadow: 0 4px 15px rgba(56, 239, 125, 0.4);
+        }
+        
+        .btn-sound:hover {
+            animation: pulse 0.5s;
+        }
+        
+        /* Notification */
+        .copy-notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--success-gradient);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(56, 239, 125, 0.4);
+            z-index: 1000;
+            display: none;
+            animation: fadeInUp 0.3s ease;
+            font-weight: 600;
+        }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--dark-bg);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #764ba2;
+        }
+        
+        .footer {
+            background: var(--card-bg);
+            border-top: 2px solid var(--border-color);
+            padding: 1.5rem 0;
+            margin-top: 3rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <!-- Settings Panel -->
+    <div class="settings-panel">
+        <button class="settings-trigger" onclick="toggleSettings()" title="Settings">
+            <i class="fas fa-cog"></i>
+        </button>
+        <div class="settings-dropdown" id="settingsDropdown">
+            <div class="settings-header">
+                <i class="fas fa-palette"></i>
+                <span>Themes & Settings</span>
+            </div>
+            <div class="theme-grid">
+                <button class="theme-option theme-dark active" onclick="changeTheme('dark')" data-theme="dark">
+                    <i class="fas fa-moon theme-icon"></i>
+                    <span>Dark Mode</span>
+                </button>
+                <button class="theme-option theme-light" onclick="changeTheme('light')" data-theme="light">
+                    <i class="fas fa-sun theme-icon"></i>
+                    <span>Light Mode</span>
+                </button>
+                <button class="theme-option theme-cyber" onclick="changeTheme('cyberpunk')" data-theme="cyberpunk">
+                    <i class="fas fa-bolt theme-icon"></i>
+                    <span>Cyberpunk</span>
+                </button>
+                <button class="theme-option theme-ocean" onclick="changeTheme('ocean')" data-theme="ocean">
+                    <i class="fas fa-water theme-icon"></i>
+                    <span>Ocean Blue</span>
+                </button>
+            </div>
+            <div class="settings-divider"></div>
+            <div class="settings-controls">
+                <div class="setting-item">
+                    <i class="fas fa-volume-up"></i>
+                    <span>Sound Effects</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="soundToggle" checked onchange="toggleSound()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <div class="main-header">
+        <!-- Animated Background Particles -->
+        <div class="header-particle"></div>
+        <div class="header-particle"></div>
+        <div class="header-particle"></div>
+        <div class="header-particle"></div>
+        <div class="header-particle"></div>
+        
+        <div class="container text-center">
+            <h1 class="text-white animate-fade-in"><i class="fas fa-check-circle"></i> Code Converted Successfully</h1>
+        </div>
+    </div>
+    
+    <!-- Floating Background Shapes -->
+    <div class="floating-shapes">
+        <div class="shape">
+            <i class="fas fa-code" style="font-size: 3rem; color: var(--primary-gradient);"></i>
+        </div>
+        <div class="shape">
+            <i class="fas fa-laptop-code" style="font-size: 2.5rem; color: var(--success-gradient);"></i>
+        </div>
+        <div class="shape">
+            <i class="fas fa-terminal" style="font-size: 2rem; color: var(--warning-gradient);"></i>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="text-center mb-5 animate-fade-in">
+            <div class="success-badge">
+                <i class="fas fa-check-circle"></i>
+                <span>Conversion Complete!</span>
+            </div>
+        </div>
+        
+        <!-- Side-by-Side Code Comparison -->
+        <div class="code-comparison animate-fade-in animate-delay-1">
+            <!-- Original Code Panel -->
+            <div class="code-panel">
+                <div class="panel-header">
+                    <div>
+                        <i class="fas fa-file-code"></i>
+                        <span>Original ({{ source_lang }})</span>
+                    </div>
+                    <div class="panel-actions">
+                        <button class="action-btn" onclick="copyOriginalCode()" title="Copy Original">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="panel-content">
+                    <div id="originalCodeEditor"></div>
+                </div>
+            </div>
+            
+            <!-- Converted Code Panel -->
+            <div class="code-panel">
+                <div class="panel-header">
+                    <div>
+                        <i class="fas fa-magic"></i>
+                        <span>Converted ({{ target_lang }})</span>
+                    </div>
+                    <div class="panel-actions">
+                        <button class="action-btn" onclick="copyCode()" title="Copy Code">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                        <button class="action-btn" onclick="downloadCode()" title="Download">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="panel-content">
+                    <div id="codeEditor"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Bottom Section -->
+        <div class="side-by-side-container">
+            <!-- Left: Comprehensive Explanation -->
+            {% if explanation %}
+            <div class="explanation-section animate-fade-in animate-delay-2">
+                <div class="result-card">
+                    <div class="section-header">
+                        <div class="section-icon warning-icon">
+                            <i class="fas fa-book-open text-white"></i>
+                        </div>
+                        <div>
+                            <h4>Comprehensive Code Analysis</h4>
+                            <span class="lang-badge">{{ source_lang }} → {{ target_lang }}</span>
+                        </div>
+                    </div>
+                    <div class="explanation-block">
+                        {{ explanation|safe }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Right: Output Window -->
+            {% if expected_output %}
+            <div class="output-section animate-fade-in animate-delay-2">
+                <div class="result-card">
+                    <div class="section-header">
+                        <div class="section-icon success-icon">
+                            <i class="fas fa-terminal text-white"></i>
+                        </div>
+                        <div>
+                            <h4>Program Output</h4>
+                            <span class="lang-badge">Execution Result</span>
+                        </div>
+                    </div>
+                    <div class="output-block">
+                        <pre>{{ expected_output }}</pre>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="action-buttons animate-fade-in animate-delay-4">
+            <button class="btn-custom btn-copy" onclick="copyCode()">
+                <i class="fas fa-copy"></i> Copy Code
+            </button>
+            <a href="/" class="btn-custom btn-back text-decoration-none">
+                <i class="fas fa-arrow-left"></i> Convert Another
+            </a>
+        </div>
+    </div>
+    
+    <!-- Notifications -->
+    <div class="copy-notification" id="copyNotification">
+        <i class="fas fa-check"></i> Code copied to clipboard!
+    </div>
+    
+    <div class="footer">
+        <div class="container">
+            <p class="mb-0"></p>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <!-- Data passed from backend -->
+    <script id="code-data" type="application/json">
+    {
+        "originalCode": {{ original_code|tojson }},
+        "convertedCode": {{ output|tojson }},
+        "sourceLang": {{ source_lang|tojson }},
+        "targetLang": {{ target_lang|tojson }}
+    }
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/clike/clike.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/php/php.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/go/go.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/ruby/ruby.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/perl/perl.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/shell/shell.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/powershell/powershell.min.js"></script>
+    
+    <script>
+        // Sound Settings
+        let soundEnabled = true;
+        
+        // Sound Effects (using Web Audio API)
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioContext = new AudioContext();
+        
+        function playSound(type) {
+            if (!soundEnabled) return;
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            if (type === 'success') {
+                oscillator.frequency.value = 800;
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.3);
+            } else if (type === 'click') {
+                oscillator.frequency.value = 600;
+                gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.1);
+            } else if (type === 'copy') {
+                oscillator.frequency.value = 1000;
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.2);
+            }
+        }
+        
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const toggle = document.getElementById('soundToggle');
+            toggle.checked = soundEnabled;
+            playSound('click');
+        }
+        
+        // Settings Panel
+        function toggleSettings() {
+            playSound('click');
+            const dropdown = document.getElementById('settingsDropdown');
+            dropdown.classList.toggle('show');
+        }
+        
+        // Close settings when clicking outside
+        document.addEventListener('click', function(event) {
+            const settingsPanel = document.querySelector('.settings-panel');
+            if (!settingsPanel.contains(event.target)) {
+                document.getElementById('settingsDropdown').classList.remove('show');
+            }
+        });
+        
+        // Theme Switcher
+        function changeTheme(theme) {
+            playSound('click');
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            
+            // Update active button
+            document.querySelectorAll('.theme-option').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.closest('.theme-option').classList.add('active');
+            
+            // Update CodeMirror theme
+            let cmTheme = 'dracula';
+            if (theme === 'light') cmTheme = 'default';
+            else if (theme === 'cyberpunk') cmTheme = 'monokai';
+            else if (theme === 'ocean') cmTheme = 'material-darker';
+            
+            if (window.editor) {
+                editor.setOption('theme', cmTheme);
+            }
+            if (window.originalEditor) {
+                originalEditor.setOption('theme', cmTheme);
+            }
+        }
+        
+        // Download Code
+        function downloadCode() {
+            playSound('copy');
+            const code = editor.getValue();
+            const targetLang = '{{ target_lang|lower }}';
+            let extension = 'txt';
+            
+            if (targetLang === 'python') extension = 'py';
+            else if (targetLang === 'javascript') extension = 'js';
+            else if (targetLang === 'typescript') extension = 'ts';
+            else if (targetLang === 'java') extension = 'java';
+            else if (targetLang === 'c++') extension = 'cpp';
+            else if (targetLang === 'c') extension = 'c';
+            else if (targetLang === 'c#') extension = 'cs';
+            else if (targetLang === 'php') extension = 'php';
+            else if (targetLang === 'go') extension = 'go';
+            else if (targetLang === 'ruby') extension = 'rb';
+            else if (targetLang === 'perl') extension = 'pl';
+            else if (targetLang === 'bash' || targetLang === 'shell') extension = 'sh';
+            else if (targetLang === 'powershell') extension = 'ps1';
+            
+            const blob = new Blob([code], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `converted_code.${extension}`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+        
+        // Copy Original Code
+        function copyOriginalCode() {
+            if (window.originalEditor) {
+                const code = originalEditor.getValue();
+                navigator.clipboard.writeText(code).then(() => {
+                    playSound('copy');
+                    showNotification('Original code copied!');
+                });
+            }
+        }
+        
+        // Show notification
+        function showNotification(message) {
+            const notification = document.getElementById('copyNotification');
+            notification.innerHTML = `<i class="fas fa-check"></i> ${message}`;
+            notification.style.display = 'block';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+        
+        // Load saved theme
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            
+            // Update active theme button
+            document.querySelectorAll('.theme-option').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            const activeBtn = document.querySelector(`[data-theme="${savedTheme}"]`);
+            if (activeBtn) activeBtn.classList.add('active');
+            
+            playSound('success');
+        });
+        
+        // Code Mirror Setup
+        const targetLang = '{{ target_lang|lower }}';
+        let mode = 'python';
+        
+        if (targetLang === 'javascript' || targetLang === 'typescript') mode = 'javascript';
+        else if (targetLang === 'java' || targetLang === 'c++' || targetLang === 'c' || targetLang === 'c#') mode = 'text/x-csrc';
+        else if (targetLang === 'php') mode = 'php';
+        else if (targetLang === 'go') mode = 'go';
+        else if (targetLang === 'ruby') mode = 'ruby';
+        else if (targetLang === 'perl') mode = 'perl';
+        else if (targetLang === 'bash' || targetLang === 'shell') mode = 'shell';
+        else if (targetLang === 'powershell') mode = 'powershell';
+        
+        // Global editor variables
+        let editor, originalEditor;
+        
+        // Initialize editors when DOM is ready
+        window.addEventListener('load', function() {
+            // Read data from JSON script tag
+            const codeData = JSON.parse(document.getElementById('code-data').textContent);
+            
+            // Debug: Check if code is being passed
+            console.log('=== CODE EDITOR DEBUG ===');
+            console.log('Data loaded:', codeData);
+            console.log('Original Code:', codeData.originalCode);
+            console.log('Converted Code:', codeData.convertedCode);
+            console.log('Source Lang:', codeData.sourceLang);
+            console.log('Target Lang:', codeData.targetLang);
+            
+            // Determine source mode
+            const sourceLang = codeData.sourceLang.toLowerCase();
+            let sourceMode = 'python';
+            
+            if (sourceLang === 'javascript' || sourceLang === 'typescript') sourceMode = 'javascript';
+            else if (sourceLang === 'java' || sourceLang === 'c++' || sourceLang === 'c' || sourceLang === 'c#') sourceMode = 'text/x-csrc';
+            else if (sourceLang === 'php') sourceMode = 'php';
+            else if (sourceLang === 'go') sourceMode = 'go';
+            else if (sourceLang === 'ruby') sourceMode = 'ruby';
+            else if (sourceLang === 'perl') sourceMode = 'perl';
+            else if (sourceLang === 'bash' || sourceLang === 'shell') sourceMode = 'shell';
+            else if (sourceLang === 'powershell') sourceMode = 'powershell';
+            
+            // Determine target mode  
+            const targetLang = codeData.targetLang.toLowerCase();
+            let targetMode = 'python';
+            
+            if (targetLang === 'javascript' || targetLang === 'typescript') targetMode = 'javascript';
+            else if (targetLang === 'java' || targetLang === 'c++' || targetLang === 'c' || targetLang === 'c#') targetMode = 'text/x-csrc';
+            else if (targetLang === 'php') targetMode = 'php';
+            else if (targetLang === 'go') targetMode = 'go';
+            else if (targetLang === 'ruby') targetMode = 'ruby';
+            else if (targetLang === 'perl') targetMode = 'perl';
+            else if (targetLang === 'bash' || targetLang === 'shell') targetMode = 'shell';
+            else if (targetLang === 'powershell') targetMode = 'powershell';
+            
+            // Create Original Code Editor
+            originalEditor = CodeMirror(document.getElementById('originalCodeEditor'), {
+                value: codeData.originalCode || '// No original code provided',
+                mode: sourceMode,
+                theme: 'dracula',
+                lineNumbers: true,
+                lineWrapping: true,
+                readOnly: true,
+                indentUnit: 4,
+                tabSize: 4,
+                matchBrackets: true
+            });
+            
+            window.originalEditor = originalEditor;
+            
+            // Create Converted Code Editor
+            editor = CodeMirror(document.getElementById('codeEditor'), {
+                value: codeData.convertedCode || '// No converted code available',
+                mode: targetMode,
+                theme: 'dracula',
+                lineNumbers: true,
+                lineWrapping: true,
+                readOnly: true,
+                indentUnit: 4,
+                tabSize: 4,
+                matchBrackets: true
+            });
+            
+            window.editor = editor;
+            
+            console.log('Editors initialized successfully');
+            console.log('Source Mode:', sourceMode);
+            console.log('Target Mode:', targetMode);
+            
+            // Refresh editors to ensure proper display
+            setTimeout(() => {
+                if (originalEditor) originalEditor.refresh();
+                if (editor) editor.refresh();
+                console.log('Editors refreshed');
+            }, 300);
+        });
+        
+        // Copy Code
+        function copyCode() {
+            const code = editor.getValue();
+            navigator.clipboard.writeText(code).then(() => {
+                playSound('copy');
+                showNotification('Converted code copied!');
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                alert('Failed to copy code to clipboard');
+            });
+        }
+        
+        // Add click sounds to buttons
+        document.querySelectorAll('button, a').forEach(element => {
+            element.addEventListener('click', () => playSound('click'));
+        });
+    </script>
+</body>
+</html>
