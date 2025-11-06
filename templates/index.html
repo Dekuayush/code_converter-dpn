@@ -1272,7 +1272,7 @@
             document.querySelectorAll('.theme-option').forEach(btn => {
                 btn.classList.remove('active');
             });
-            const activeBtn = document.querySelector([data-theme="${savedTheme}"]);
+            const activeBtn = document.querySelector(`[data-theme="${savedTheme}"]`);
             if (activeBtn) activeBtn.classList.add('active');
             
             playSound('success');
