@@ -6,13 +6,16 @@ import re
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
-load_dotenv()
+load_dotenv(override=True)  # .env wins over stale system variables
+
+# Model is configurable: set GROQ_MODEL in .env to switch without editing code
+MODEL = os.environ.get("GROQ_MODEL", "openai/gpt-oss-120b")
 
 app = Flask(__name__)
 
 def get_groq_client():
     """Initialize and return Groq client"""
-    api_key = os.environ.get("API_KEY") or os.environ.get("GROQ_API_KEY")
+    api_key = os.environ.get("GROQ_API_KEY") or os.environ.get("API_KEY")
     
     if not api_key:
         raise ValueError("API key is not set. Please set it as an environment variable.")
@@ -60,10 +63,10 @@ Code to convert:
             ]
 
             convert_response = client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
+                model=MODEL,
                 messages=convert_prompt,
                 temperature=0.7,
-                max_tokens=2048,
+                max_tokens=4096,
                 top_p=1,
                 stream=False,
                 stop=None
@@ -130,10 +133,10 @@ Converted {target_language} code (with complete boilerplate):
             ]
 
             explain_response = client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
+                model=MODEL,
                 messages=explain_prompt,
                 temperature=0.8,
-                max_tokens=2048,
+                max_tokens=4096,
                 top_p=1,
                 stream=False,
                 stop=None
@@ -163,7 +166,7 @@ Guidelines:
             ]
 
             output_response = client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
+                model=MODEL,
                 messages=output_prompt,
                 temperature=0.7,
                 max_tokens=1024,
@@ -210,7 +213,7 @@ if __name__ == '__main__':
         print("[OK] API key is configured and ready!")
     except:
         print("[WARNING] API key is not set!")
-        print("   Set it using: $env:API_KEY='your_key_here'")
+        print("   Set it using: $env:GROQ_API_KEY='your_key_here'")
     
     print("\nOpen your browser and go to: http://localhost:5000")
     print("="*60 + "\n")

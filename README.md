@@ -43,7 +43,7 @@ pip install -r requirements.txt
 4. Set up environment variables:
 Create a `.env` file in the root directory and add your Groq API key:
 ```
-API_KEY=your_api_key_here
+GROQ_API_KEY=your_api_key_here
 ```
 
 ## Running Locally
@@ -61,7 +61,7 @@ The application will be available at `http://localhost:5000`
 1. Create a Render account at [render.com](https://render.com)
 2. Create a new Web Service
 3. Connect your GitHub repository
-4. Set the environment variable `API_KEY` in the Render dashboard
+4. Set the environment variable `GROQ_API_KEY` in the Render dashboard
 5. Deploy!
 
 ## Usage
